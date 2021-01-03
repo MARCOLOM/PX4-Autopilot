@@ -45,11 +45,8 @@
 #include <mathlib/mathlib.h>
 
 #include <errno.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <poll.h>
 #include <pthread.h>
-#include <sys/socket.h>
 #include <termios.h>
 
 #include <limits>
@@ -562,21 +559,21 @@ void Simulator::handle_message_vision_position_estimate(const mavlink_message_t 
 void Simulator::send_mavlink_message(const mavlink_message_t &aMsg)
 {
 	uint8_t  buf[MAVLINK_MAX_PACKET_LEN];
-	uint16_t bufLen = 0;
+	uint16_t bufLen = mavlink_msg_to_send_buffer(buf, &aMsg);
 
-	bufLen = mavlink_msg_to_send_buffer(buf, &aMsg);
+	if (bufLen > 0) {
+		ssize_t len;
 
-	ssize_t len;
+		if (_ip == InternetProtocol::UDP) {
+			len = ::sendto(_fd, buf, bufLen, 0, (struct sockaddr *)&_srcaddr, sizeof(_srcaddr));
 
-	if (_ip == InternetProtocol::UDP) {
-		len = ::sendto(_fd, buf, bufLen, 0, (struct sockaddr *)&_srcaddr, sizeof(_srcaddr));
+		} else {
+			len = ::send(_fd, buf, bufLen, 0);
+		}
 
-	} else {
-		len = ::send(_fd, buf, bufLen, 0);
-	}
-
-	if (len <= 0) {
-		PX4_WARN("Failed sending mavlink message: %s", strerror(errno));
+		if (len <= 0) {
+			PX4_ERR("Failed sending mavlink message: %s", strerror(errno));
+		}
 	}
 }
 
@@ -668,7 +665,6 @@ void Simulator::run()
 	pthread_setname_np(pthread_self(), "sim_rcv");
 #endif
 
-	struct sockaddr_in _myaddr {};
 	_myaddr.sin_family = AF_INET;
 	_myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	_myaddr.sin_port = htons(_port);
@@ -713,20 +709,22 @@ void Simulator::run()
 				return;
 			}
 
-			int yes = 1;
-			int ret = setsockopt(_fd, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof(int));
+			int optval = 1;
+			int optlen = sizeof(optval);
+
+			int ret = setsockopt(_fd, IPPROTO_TCP, TCP_NODELAY, &optval, optlen);
 
 			if (ret != 0) {
 				PX4_ERR("setsockopt failed: %s", strerror(errno));
 			}
 
-			socklen_t myaddr_len = sizeof(_myaddr);
-			ret = connect(_fd, (struct sockaddr *)&_myaddr, myaddr_len);
+			ret = connect(_fd, (struct sockaddr *)&_myaddr, sizeof(_myaddr));
 
 			if (ret == 0) {
 				break;
 
 			} else {
+				PX4_ERR("connect failed: %d %s", ret, strerror(errno));
 				::close(_fd);
 				system_usleep(500);
 			}
@@ -812,7 +810,13 @@ void Simulator::run()
 						handle_message(&msg);
 					}
 				}
+
+			} else {
+				PX4_ERR("recvfrom: %d %s", len, strerror(errno));
 			}
+
+		} else if (fds[0].revents) {
+			PX4_ERR("revents %d", fds[0].revents);
 		}
 
 #ifdef ENABLE_UART_RC_INPUT
