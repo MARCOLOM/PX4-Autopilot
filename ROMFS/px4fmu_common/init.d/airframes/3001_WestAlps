@@ -7,8 +7,8 @@
 #
 # @output MAIN1 left aileron
 # @output MAIN2 right aileron
-# @output MAIN3 throttle 
-# @output MAIN4 throttle
+# @output MAIN3 motor left 
+# @output MAIN4 motor right
 #
 # @output AUX1 feed-through of RC AUX1 channel
 # @output AUX2 feed-through of RC AUX2 channel
