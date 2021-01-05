@@ -87,6 +87,7 @@ px4_add_romfs_files(
 	uuv_x.main.mix
 	vectored6dof.main.mix
 	Viper.main.mix
+	WESTALPS.main.mix
 	vtol_AAERT.aux.mix
 	vtol_AAVVT.aux.mix
 	vtol_convergence.main.mix
