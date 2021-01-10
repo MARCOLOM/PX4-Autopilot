@@ -22,3 +22,4 @@
 . ${R}etc/init.d/rc.fw_defaults
 
 set MIXER WESTALPS
+set MIXER_AUX WESTALPS
