@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# @name WestAlps2
+# @name WestAlpsB
 #
 # @type Flying Wing
 # @class Plane
@@ -22,4 +22,4 @@
 
 . ${R}etc/init.d/rc.fw_defaults
 
-set MIXER WESTALPS2
+set MIXER WESTALPSB
