@@ -51,6 +51,7 @@ px4_add_romfs_files(
 	# [3000, 3999] Flying wing"
 	3000_generic_wing
 	3001_WestAlps
+	3002_WestAlpsB
 	3030_io_camflyer
 	3031_phantom
 	3032_skywalker_x5
