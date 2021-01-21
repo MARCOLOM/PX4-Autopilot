@@ -19,7 +19,8 @@
 # @board intel_aerofc-v1 exclude
 # @board bitcraze_crazyflie exclude
 #
-set PWM_OUT 1234
+
 . ${R}etc/init.d/rc.fw_defaults
 
 set MIXER WESTALPSB
+set PWM_OUT 1234
