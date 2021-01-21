@@ -23,4 +23,4 @@
 . ${R}etc/init.d/rc.fw_defaults
 
 set MIXER WESTALPSB
-set PWM_OUT 1234
+set PWM_OUT 3
